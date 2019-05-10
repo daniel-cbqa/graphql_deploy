@@ -12,7 +12,10 @@ mongoose
   .catch(err => console.error(err));
 
 const server = new ApolloServer({
-  cors: "*",
+  cors: {
+    origin: "*",
+    credentials: true
+  },
   introspection: true,
   typeDefs,
   resolvers,
