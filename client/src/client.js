@@ -1,14 +1,13 @@
-import { useState, useEffect } from "react";
 import { GraphQLClient } from "graphql-request";
+import { useState, useEffect } from "react";
 
-export const BASE_URL =
+export const ENDPOINT =
   process.env.NODE_ENV === "production"
     ? "https://training-graphql.herokuapp.com/graphql"
     : "http://localhost:4000/graphql";
 
 export const useClient = () => {
   const [idToken, setIdToken] = useState("");
-
   useEffect(() => {
     const token = window.gapi.auth2
       .getAuthInstance()
@@ -16,8 +15,7 @@ export const useClient = () => {
       .getAuthResponse().id_token;
     setIdToken(token);
   }, []);
-
-  return new GraphQLClient(BASE_URL, {
+  return new GraphQLClient(ENDPOINT, {
     headers: { authorization: idToken }
   });
 };

@@ -8,53 +8,61 @@ import AddAPhotoIcon from "@material-ui/icons/AddAPhotoTwoTone";
 import LandscapeIcon from "@material-ui/icons/LandscapeOutlined";
 import ClearIcon from "@material-ui/icons/Clear";
 import SaveIcon from "@material-ui/icons/SaveTwoTone";
+import Context from "../../context";
+import { CREATE_PIN_MUTATION } from "../../graphql/mutations";
+import { useClient } from "../../client";
 import { unstable_useMediaQuery as useMediaQuery } from "@material-ui/core/useMediaQuery";
 
-import Context from "../../context";
-import { useClient } from "../../client";
-import { CREATE_PIN_MUTATION } from "../../graphql/mutations";
-
 const CreatePin = ({ classes }) => {
-  const mobileSize = useMediaQuery("(max-width: 650px)");
+  const isMobileSize = useMediaQuery("(max-width: 650px)");
   const client = useClient();
   const { state, dispatch } = useContext(Context);
   const [title, setTitle] = useState("");
   const [image, setImage] = useState("");
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const handleSubmit = async event => {
+    try {
+      event.preventDefault();
+      setSubmitting(true);
+      const url = await handleImageUpload();
+      const { longitude, latitude } = state.draft;
+      const variables = {
+        title,
+        image: url,
+        content,
+        longitude,
+        latitude
+      };
+      //const { createPin } =
+      await client.request(CREATE_PIN_MUTATION, variables);
+      //console.log("Pin created", { createPin });
+      //dispatch({ type: "CREATE_PIN", payload: createPin });
+      handleDeleteDraft();
+    } catch (err) {
+      setSubmitting(false);
+      console.error("Error creating pin", err);
+    }
+  };
+
+  const handleImageUpload = async () => {
+    const cloud_name = "dk60vhdyq";
+    const data = new FormData();
+    data.append("file", image);
+    data.append("upload_preset", "geopins");
+    data.append("cloud_name", cloud_name);
+    const res = await axios.post(
+      `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
+      data
+    );
+    return res.data.url;
+  };
 
   const handleDeleteDraft = () => {
     setTitle("");
     setImage("");
     setContent("");
     dispatch({ type: "DELETE_DRAFT" });
-  };
-
-  const handleImageUpload = async () => {
-    const data = new FormData();
-    data.append("file", image);
-    data.append("upload_preset", "geopins");
-    data.append("cloud_name", "reedbargercodes");
-    const res = await axios.post(
-      "https://api.cloudinary.com/v1_1/reedbargercodes/image/upload",
-      data
-    );
-    return res.data.url;
-  };
-
-  const handleSubmit = async event => {
-    try {
-      event.preventDefault();
-      setSubmitting(true);
-      const url = await handleImageUpload();
-      const { latitude, longitude } = state.draft;
-      const variables = { title, image: url, content, latitude, longitude };
-      await client.request(CREATE_PIN_MUTATION, variables);
-      handleDeleteDraft();
-    } catch (err) {
-      setSubmitting(false);
-      console.error("Error creating pin", err);
-    }
   };
 
   return (
@@ -65,7 +73,8 @@ const CreatePin = ({ classes }) => {
         variant="h4"
         color="secondary"
       >
-        <LandscapeIcon className={classes.iconLarge} /> Pin Location
+        <LandscapeIcon className={classes.iconLarge} />
+        Pin Location
       </Typography>
       <div>
         <TextField
@@ -75,9 +84,9 @@ const CreatePin = ({ classes }) => {
           onChange={e => setTitle(e.target.value)}
         />
         <input
+          type="file"
           accept="image/*"
           id="image"
-          type="file"
           className={classes.input}
           onChange={e => setImage(e.target.files[0])}
         />
@@ -95,9 +104,9 @@ const CreatePin = ({ classes }) => {
       <div className={classes.contentField}>
         <TextField
           name="content"
-          label="Content"
+          label="content"
           multiline
-          rows={mobileSize ? "3" : "6"}
+          rows={isMobileSize ? "9" : "6"}
           margin="normal"
           fullWidth
           variant="outlined"
@@ -106,19 +115,19 @@ const CreatePin = ({ classes }) => {
       </div>
       <div>
         <Button
-          onClick={handleDeleteDraft}
           className={classes.button}
-          variant="contained"
           color="primary"
+          variant="contained"
+          onClick={handleDeleteDraft}
         >
           <ClearIcon className={classes.leftIcon} />
           Discard
         </Button>
         <Button
-          type="submit"
           className={classes.button}
-          variant="contained"
           color="secondary"
+          variant="contained"
+          type="submit"
           disabled={!title.trim() || !content.trim() || !image || submitting}
           onClick={handleSubmit}
         >

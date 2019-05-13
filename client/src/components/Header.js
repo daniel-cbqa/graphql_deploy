@@ -4,24 +4,23 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import MapIcon from "@material-ui/icons/Map";
 import Typography from "@material-ui/core/Typography";
+import Context from "../context";
+import Signout from "./Auth/Signout";
 import { unstable_useMediaQuery as useMediaQuery } from "@material-ui/core/useMediaQuery";
 
-import Context from "../context";
-import Signout from "../components/Auth/Signout";
-
 const Header = ({ classes }) => {
-  const mobileSize = useMediaQuery("(max-width: 650px)");
+  const isMobileSize = useMediaQuery("(max-width: 650px)");
   const { state } = useContext(Context);
   const { currentUser } = state;
   return (
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar>
-          {/* Title / Logo */}
+          {/* Title / Logo*/}
           <div className={classes.grow}>
             <MapIcon className={classes.icon} />
             <Typography
-              className={mobileSize ? classes.mobile : ""}
+              className={isMobileSize ? classes.mobile : ""}
               component="h1"
               variant="h6"
               color="inherit"
@@ -30,8 +29,7 @@ const Header = ({ classes }) => {
               GeoPins
             </Typography>
           </div>
-
-          {/* Current User Info */}
+          {/* Current user info */}
           {currentUser && (
             <div className={classes.grow}>
               <img
@@ -40,17 +38,15 @@ const Header = ({ classes }) => {
                 alt={currentUser.name}
               />
               <Typography
-                className={mobileSize ? classes.mobile : ""}
                 variant="h5"
-                color="inherit"
                 noWrap
+                color="inherit"
+                className={isMobileSize ? classes.mobile : ""}
               >
                 {currentUser.name}
               </Typography>
             </div>
           )}
-
-          {/* Signout Button */}
           <Signout />
         </Toolbar>
       </AppBar>

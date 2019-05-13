@@ -1,4 +1,5 @@
 export default function reducer(state, { type, payload }) {
+  //reducer(state, action)
   switch (type) {
     case "LOGIN_USER":
       return {
@@ -72,7 +73,7 @@ export default function reducer(state, { type, payload }) {
       };
     case "CREATE_COMMENT":
       const updatedCurrentPin = payload;
-      // find and replace
+      //find and replace
       const updatedPins = state.pins.map(pin =>
         pin._id === updatedCurrentPin._id ? updatedCurrentPin : pin
       );
